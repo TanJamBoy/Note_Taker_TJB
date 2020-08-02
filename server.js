@@ -24,21 +24,48 @@ app.get("/api/notes", (req, res) => {
 });
 
 app.post("/api/notes", (req, res) => {
-    let newNote = req.body;
 
-    console.log(newNote);
+    let newNote = req.body;
 
     db.push(newNote);
 
-    fs.writeFile(path.join(__dirname, "/db/db.json"), JSON.stringify(db), (err) => {
-        if (err) throw err;
-    });
+    addIdToObjects();
+
+});
+
+app.get(`/api/notes/:id`, (req, res) => {
+
+    let noteId = req.params.id;
+
+    return res.json(db[noteId-1]);
+
 });
 
 app.delete(`/api/notes/:id`, (req, res) => {
-    res.send("Cleared Lists");
+
+    let noteId = req.params.id;
+
+    db.splice(noteId-1, 1);
+
+    addIdToObjects();
+
+    console.log("Deleted Note");
+
+    res.send("Deleted Note");
+
 });
 
 app.listen(PORT, () => {
     console.log(`listening on port: ${PORT}`);
 });
+
+function addIdToObjects(){
+    let id = 1;
+    db.forEach(e => {
+        e.id = id;
+        id++;
+    });
+    fs.writeFile(path.join(__dirname, "/db/db.json"), JSON.stringify(db), (err) => {
+        if (err) throw err;
+    });
+};
